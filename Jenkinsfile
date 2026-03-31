@@ -1,25 +1,48 @@
 pipeline {
     agent any
 
+    environment {
+        REGISTRY = "amdp-registry.skala-ai.com"
+        PROJECT = "skala25a"
+        IMAGE_NAME = "jenkins-pipeline-test"
+        IMAGE = "${REGISTRY}/${PROJECT}/${IMAGE_NAME}"
+        TAG = "latest"
+    }
+
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                echo '빌드 수행'
-                sh 'echo "build start"'
+                checkout scm
             }
         }
 
-        stage('Test') {
+        stage('Docker Build') {
             steps {
-                echo '테스트 수행'
-                sh 'echo "test start"'
+                sh 'docker build -t ${IMAGE}:${TAG} .'
             }
         }
 
-        stage('Deploy') {
+        stage('Harbor Login') {
             steps {
-                echo '배포 수행'
-                sh 'echo "deploy start"'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'harbor-creds',
+                        usernameVariable: 'HARBOR_USER',
+                        passwordVariable: 'HARBOR_PASS'
+                    )
+                ]) {
+                    sh '''
+                    echo "$HARBOR_PASS" | docker login amdp-registry.skala-ai.com \
+                    -u "$HARBOR_USER" \
+                    --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh 'docker push ${IMAGE}:${TAG}'
             }
         }
     }
