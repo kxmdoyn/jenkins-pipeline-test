@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REGISTRY = "amdp-registry.skala-ai.com"
-        PROJECT = "skala25a"
+        PROJECT = "skala26a-ai2"
         IMAGE_NAME = "jenkins-pipeline-test"
         IMAGE = "${REGISTRY}/${PROJECT}/${IMAGE_NAME}"
         TAG = "latest"
@@ -32,7 +32,7 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                    echo "$HARBOR_PASS" | docker login amdp-registry.skala-ai.com \
+                    echo "$HARBOR_PASS" | docker login amdp-registry.skala-ai.com/skala26a-ai2 \
                     -u "$HARBOR_USER" \
                     --password-stdin
                     '''
