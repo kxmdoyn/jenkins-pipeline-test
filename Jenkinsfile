@@ -22,6 +22,19 @@ pipeline {
             }
         }
 
+        stage('Harbor Login') {
+            steps {
+                withCredentials([string(credentialsId: 'harbor-ai2-token', variable: 'HARBOR_TOKEN')]) {
+                    sh '''
+                    docker logout amdp-registry.skala-ai.com || true
+                    echo "$HARBOR_TOKEN" | docker login amdp-registry.skala-ai.com/skala26a-ai2 \
+                      -u 'robot$skala26a-ai2' \
+                      --password-stdin
+                    '''
+                }
+            }
+        }
+
         stage('Docker Push') {
             steps {
                 sh 'docker push ${IMAGE}:${TAG}'
