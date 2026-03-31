@@ -1,0 +1,48 @@
+오늘 DevOps 1일차 정리 🎯
+1. DevOps란?
+
+Dev(개발) + Ops(운영) 을 통합하는 문화와 철학
+빠른 배포, 자동화, 협업이 핵심
+CI/CD 파이프라인으로 실현
+
+
+2. 오늘 한 것 - CI Pipeline 구축
+전체 흐름
+코드 작성 → GitHub Push → Jenkins 빌드 
+→ Docker 이미지 빌드 → Harbor Registry에 Push
+사용한 도구들
+도구역할GitHub소스코드 저장소JenkinsCI 자동화 서버Docker이미지 빌드Harbor이미지 저장소(Registry)
+
+3. 환경 구성
+yaml# docker-compose.yaml로 Jenkins 실행
+- jenkins/jenkins:lts-jdk21 이미지 사용
+- docker.sock 마운트 → Jenkins가 Docker 사용 가능
+
+4. Jenkinsfile 구조
+groovypipeline {
+    agent any
+    environment { }   // 환경변수 설정
+    stages {
+        stage('Checkout')      // 코드 가져오기
+        stage('Docker Build')  // 이미지 빌드
+        stage('Harbor Login')  // Registry 로그인
+        stage('Docker Push')   // 이미지 업로드
+    }
+}
+
+5. 오늘의 핵심 트러블슈팅 🔥
+문제: robot$skala26a-ai2 에서 $skala26a가 셸 변수로 해석됨
+해결: environment 블록에 싱글쿼트로 선언
+groovyHARBOR_USER = 'robot$skala26a-ai2'
+
+6. 배운 Git 명령어
+bashgit add .
+git commit -m "메시지"
+git push
+git pull
+
+다음에 배울 것들
+
+Tekton - K8s 네이티브 CI/CD
+GitHub Actions - GitHub 내장 CI/CD
+ArgoCD - GitOps 기반 CD
