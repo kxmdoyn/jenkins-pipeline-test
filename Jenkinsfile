@@ -27,7 +27,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'harbor-ai2-token', variable: 'HARBOR_TOKEN')]) {
                     sh '''
                     docker logout amdp-registry.skala-ai.com || true
-                    echo "$HARBOR_TOKEN" | docker login amdp-registry.skala-ai.com \
+                    echo ${HARBOR_TOKEN} | docker login amdp-registry.skala-ai.com \
                       -u 'robot$skala26a-ai2' \
                       --password-stdin
                     '''
