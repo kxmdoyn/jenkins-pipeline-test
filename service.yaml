@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: jenkins-pipeline-test
+  namespace: class-2
 spec:
   selector:
     app: jenkins-pipeline-test
