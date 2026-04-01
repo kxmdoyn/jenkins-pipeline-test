@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-pipeline-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins-pipeline-test
+  template:
+    metadata:
+      labels:
+        app: jenkins-pipeline-test
+    spec:
+      containers:
+        - name: jenkins-pipeline-test
+          image: __IMAGE__
+          ports:
+            - containerPort: 8080
