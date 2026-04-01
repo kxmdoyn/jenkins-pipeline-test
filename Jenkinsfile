@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "amdp-registry.skala-ai.com"
-        PROJECT = "skala26a-ai2"
-        IMAGE_NAME = "jenkins-pipeline-test"
-        IMAGE = "${REGISTRY}/${PROJECT}/${IMAGE_NAME}"
-        TAG = "${BUILD_NUMBER}"
-        HARBOR_USER = 'robot$skala26a-ai2'
+        REGISTRY      = "amdp-registry.skala-ai.com"
+        PROJECT       = "skala26a-ai2"
+        IMAGE_NAME    = "jenkins-pipeline-test"
+        IMAGE         = "${REGISTRY}/${PROJECT}/${IMAGE_NAME}"
+        TAG           = "${BUILD_NUMBER}"
+        HARBOR_USER   = 'robot$skala26a-ai2'
         K8S_NAMESPACE = "class-2"
     }
 
@@ -19,28 +19,31 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t ${IMAGE}:${TAG} .'
-            }
-        }
-
         stage('Harbor Login') {
             steps {
                 withCredentials([string(credentialsId: 'harbor-ai2-token', variable: 'HARBOR_TOKEN')]) {
                     sh '''
                         docker logout amdp-registry.skala-ai.com || true
-                        echo ${HARBOR_TOKEN} | docker login amdp-registry.skala-ai.com \
-                          -u ${HARBOR_USER} \
+                        echo "${HARBOR_TOKEN}" | docker login amdp-registry.skala-ai.com \
+                          -u "${HARBOR_USER}" \
                           --password-stdin
                     '''
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('Docker Buildx Build & Push') {
             steps {
-                sh 'docker push ${IMAGE}:${TAG}'
+                sh '''
+                    docker buildx create --name mybuilder --use || docker buildx use mybuilder
+                    docker buildx inspect --bootstrap
+
+                    docker buildx build \
+                      --platform linux/amd64 \
+                      -t ${IMAGE}:${TAG} \
+                      --push \
+                      .
+                '''
             }
         }
 
@@ -49,6 +52,7 @@ pipeline {
                 sh '''
                     cp deployment.yaml deployment-rendered.yaml
                     sed -i "s|__IMAGE__|${IMAGE}:${TAG}|g" deployment-rendered.yaml
+
                     kubectl apply -f deployment-rendered.yaml -n ${K8S_NAMESPACE}
                     kubectl apply -f service.yaml -n ${K8S_NAMESPACE}
                 '''
