@@ -12,6 +12,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -48,12 +49,13 @@ pipeline {
                 sh '''
                     cp deployment.yaml deployment-rendered.yaml
                     sed -i "s|__IMAGE__|${IMAGE}:${TAG}|g" deployment-rendered.yaml
-                    kubectl apply -n ${K8S_NAMESPACE} -f deployment-rendered.yaml
+                    kubectl apply -f deployment-rendered.yaml -n ${K8S_NAMESPACE}
+                    kubectl apply -f service.yaml -n ${K8S_NAMESPACE}
                 '''
             }
         }
 
-        stage('Check Rollout') {
+        stage('Check Rollout Status') {
             steps {
                 sh '''
                     kubectl rollout status deployment/${IMAGE_NAME} -n ${K8S_NAMESPACE} --timeout=300s
