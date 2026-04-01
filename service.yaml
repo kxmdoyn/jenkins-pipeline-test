@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-pipeline-test
+spec:
+  selector:
+    app: jenkins-pipeline-test
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
