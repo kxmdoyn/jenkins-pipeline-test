@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jenkins-pipeline-test
+  namespace: class-2
 spec:
   replicas: 1
   selector:
@@ -15,5 +16,6 @@ spec:
       containers:
         - name: jenkins-pipeline-test
           image: __IMAGE__
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
